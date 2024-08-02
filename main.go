@@ -5,11 +5,25 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"log"
+	"tidbits/internal/cliflags"
+	"tidbits/internal/db"
+	"tidbits/internal/logger"
 	"tidbits/internal/sensors"
 )
 
 func main() {
+	flags := cliflags.ParseFlags()
+	log := logger.NewLogger(flags)
+	defer log.Close()
+
+	tbdb, err := db.NewTidbitsDB(log)
+	if err != nil {
+		log.Fatal("failed to connect to db: ", err)
+	}
+	defer tbdb.Close()
+
+	tbdb.Init()
+
 	a := app.New()
 	w := a.NewWindow("Tidbits")
 
@@ -18,7 +32,7 @@ func main() {
 
 	}
 	button := widget.NewButton("Sensors", func() {
-		log.Println("clicked")
+		log.Info("clicked button")
 	})
 	menu := container.New(layout.NewVBoxLayout(), button)
 	rawsensor := widget.NewLabel(sensdata.Fulltext)

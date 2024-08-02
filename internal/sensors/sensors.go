@@ -2,8 +2,6 @@ package sensors
 
 import (
 	"os/exec"
-	"regexp"
-	"strings"
 )
 
 type sensor struct {
@@ -29,20 +27,20 @@ func GetSensorReadings() (Reading, error) {
 	return Reading{Fulltext: string(output)}, nil
 }
 
-func parseSensorReading(reading string) (Reading, error) {
-	renum := regexp.MustCompile(`[0-9]`)
-	lines := strings.Split(reading, "\n")
-	prevline := ""
-	for _, line := range lines {
-		if strings.HasPrefix(line, "Adapter:") {
-			// previous line is the device identifier
-
-		} else {
-			if strings.Contains(line, ":") && renum.MatchString(line) {
-
-			}
-		}
-		// The previous line might have the hardware id
-		prevline = line
-	}
-}
+//func parseSensorReading(reading string) (Reading, error) {
+//	renum := regexp.MustCompile(`[0-9]`)
+//	lines := strings.Split(reading, "\n")
+//	prevline := ""
+//	for _, line := range lines {
+//		if strings.HasPrefix(line, "Adapter:") {
+//			// previous line is the device identifier
+//
+//		} else {
+//			if strings.Contains(line, ":") && renum.MatchString(line) {
+//
+//			}
+//		}
+//		// The previous line might have the hardware id
+//		prevline = line
+//	}
+//}

@@ -1,0 +1,70 @@
+package db
+
+import (
+	"database/sql"
+	"fmt"
+	_ "github.com/mattn/go-sqlite3"
+	"log"
+	"path/filepath"
+	"tidbits/internal/logger"
+
+	"tidbits/internal/utils"
+)
+
+const DB_FILENAME = "tidbits.sqlite3"
+
+type TidbitsDB struct {
+	db  *sql.DB
+	log *logger.Logger
+}
+
+var tables []string = []string{
+	"settings",
+	"sensors",
+}
+
+func NewTidbitsDB(log *logger.Logger) (*TidbitsDB, error) {
+	confpath := utils.GetConfigDir()
+	db, err := sql.Open("sqlite3", filepath.Join(confpath, DB_FILENAME))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &TidbitsDB{
+		db:  db,
+		log: log,
+	}, nil
+}
+
+func (t *TidbitsDB) Close() {
+	t.db.Close()
+}
+
+func (t *TidbitsDB) Init() {
+	t.getListTables()
+}
+
+func (t *TidbitsDB) getListTables() {
+	// Query to list tables
+	query := `SELECT name FROM sqlite_master WHERE type='table'`
+
+	// Execute the query
+	rows, err := t.db.Query(query)
+
+	if err != nil {
+		t.log.Fatal("failed to query the database for list of tables: ", err)
+	}
+	defer rows.Close()
+
+	// Iterate through the result set and print table names
+	fmt.Println("Tables in the database:")
+	for rows.Next() {
+		var tableName string
+		err = rows.Scan(&tableName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(tableName)
+	}
+}
