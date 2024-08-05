@@ -11,21 +11,20 @@ import (
 	"tidbits/internal/utils"
 )
 
-const DB_FILENAME = "tidbits.sqlite3"
+const dbfilename = "tidbits.sqlite3"
 
 type TidbitsDB struct {
 	db  *sql.DB
 	log *logger.Logger
 }
 
-var tables []string = []string{
-	"settings",
-	"sensors",
+type table struct {
+	name string
 }
 
 func NewTidbitsDB(log *logger.Logger) (*TidbitsDB, error) {
 	confpath := utils.GetConfigDir()
-	db, err := sql.Open("sqlite3", filepath.Join(confpath, DB_FILENAME))
+	db, err := sql.Open("sqlite3", filepath.Join(confpath, dbfilename))
 
 	if err != nil {
 		return nil, err
