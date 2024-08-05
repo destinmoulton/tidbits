@@ -4,8 +4,10 @@ Uses `sqlc` to generate go from sql files.
 
 `sqlc` config is in sqlc.yaml.
 
-Tables are defined in schema.sql
-Queries are defined in query.sql
-
-Generate the `internal/queries`:
+Generate the `internal/queries` package:
 `sqlc generate`
+
+Queries are defined in query.sql.
+Queries are automatically converted to functions.
+
+Tables are defined by the `db/migrations` using dbmate. Run `sqlc generate` to re-generate the go code after any migration alterations.
