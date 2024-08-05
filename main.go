@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
@@ -11,12 +12,18 @@ import (
 	"tidbits/internal/sensors"
 )
 
+// Use go embed to put them
+// the db migrationsFS in the binary
+
+//go:embed db/migrations/*.sql
+var migrationsFS embed.FS
+
 func main() {
 	flags := cliflags.ParseFlags()
 	log := logger.NewLogger(flags)
 	defer log.Close()
 
-	tbdb, err := db.NewTidbitsDB(log)
+	tbdb, err := db.NewTidbitsDB(log, migrationsFS)
 	if err != nil {
 		log.Fatal("failed to connect to db: ", err)
 	}

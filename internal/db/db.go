@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"embed"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
@@ -22,9 +23,17 @@ type table struct {
 	name string
 }
 
-func NewTidbitsDB(log *logger.Logger) (*TidbitsDB, error) {
+func NewTidbitsDB(log *logger.Logger, migrations embed.FS) (*TidbitsDB, error) {
 	confpath := utils.GetConfigDir()
-	db, err := sql.Open("sqlite3", filepath.Join(confpath, dbfilename))
+	dbpath := filepath.Join(confpath, dbfilename)
+
+	// Run migrations (db/migrations)
+	err := runMigrations(dbpath, migrations)
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := sql.Open("sqlite3", dbpath)
 
 	if err != nil {
 		return nil, err
