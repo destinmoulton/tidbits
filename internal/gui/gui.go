@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 	"tidbits/internal/db"
-	"tidbits/internal/gui/sensors"
 	"tidbits/internal/logger"
 )
 
@@ -39,7 +38,7 @@ func (g *GUI) Run() {
 		mainContent.Content = BuildDashboardBox()
 	})
 	sensorsBtn := widget.NewButton("Sensors", func() {
-		mainContent.Content = sensors.BuildSensorsBox()
+		mainContent.Content = BuildSensorsBox()
 	})
 	quitBtn := widget.NewButton("Quit", func() {
 		temp2.SetText("NUEVO")

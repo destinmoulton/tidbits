@@ -7,17 +7,19 @@ import (
 	"strings"
 )
 
-func lmParseSensorReadings() Readings {
+func LMSensorsParseReadings() (SensorDevices, SensorReadings) {
 
 	cmd := exec.Command("sensors")
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 
-	var readings Readings
+	var readings SensorReadings = make(SensorReadings)
+	var devices SensorDevices
 	reVoltage := regexp.MustCompile(`.*[0-9].*V.*`)
+	reMilliVoltage := regexp.MustCompile(`.*[0-9].*mV.*`)
 	reRPM := regexp.MustCompile(`.*[0-9].*RPM.*`)
 	reTemp := regexp.MustCompile(`.*[0-9].*°C.*`)
 	reNumber := regexp.MustCompile(`\d+(\.\d+)?`)
@@ -26,12 +28,13 @@ func lmParseSensorReadings() Readings {
 	var device DeviceName
 	for _, line := range lines {
 		isSensor := false
-		sensorType := ""
+		var sensorType SensorType
 		if strings.HasPrefix(line, "Adapter:") {
 			// previous line is the device identifier
 			device = DeviceName(prevline)
 			_, ok := readings[device]
 			if !ok {
+				devices = append(devices, device)
 				readings[device] = nil
 			}
 		} else {
@@ -40,13 +43,16 @@ func lmParseSensorReadings() Readings {
 				data := strings.TrimSpace(parts[1])
 				if reVoltage.MatchString(data) {
 					isSensor = true
-					sensorType = "voltage"
+					sensorType = STV
+					if reMilliVoltage.MatchString(data) {
+						sensorType = STmV
+					}
 				} else if reRPM.MatchString(data) {
 					isSensor = true
-					sensorType = "fan"
+					sensorType = STSpeed
 				} else if reTemp.MatchString(data) {
 					isSensor = true
-					sensorType = "temperature"
+					sensorType = STTemperature
 				}
 
 				if isSensor {
@@ -56,12 +62,13 @@ func lmParseSensorReadings() Readings {
 					if err == nil {
 						sensorName := SensorName(parts[0])
 						sensors := readings[device]
-						sensors[sensorName] = Sensor{
+						sensors = append(sensors, SensorReading{
 							Name:    sensorName,
 							Type:    sensorType,
 							Device:  device,
 							Reading: tmp,
-						}
+							Source:  "lm_sensors",
+						})
 						readings[device] = sensors
 					}
 				}
@@ -71,5 +78,5 @@ func lmParseSensorReadings() Readings {
 		// The previous line might have the hardware id
 		prevline = line
 	}
-	return readings
+	return devices, readings
 }
