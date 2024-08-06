@@ -1,46 +1,18 @@
 package sensors
 
-import (
-	"os/exec"
-)
-
-type sensor struct {
-	id    string
-	value float64
-	units string
+type DeviceName string
+type SensorName string
+type Sensor struct {
+	Name    SensorName
+	Type    string
+	Device  DeviceName
+	Reading float64
 }
 
-type sensors []sensor
+type Sensors map[SensorName]Sensor
 
-type Reading struct {
-	Fulltext string
+type Readings map[DeviceName]Sensors
+
+func GetSensorReadings() Readings {
+	return lmParseSensorReadings()
 }
-
-func GetSensorReadings() (Reading, error) {
-	cmd := exec.Command("sensors")
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return Reading{}, err
-	}
-
-	return Reading{Fulltext: string(output)}, nil
-}
-
-//func parseSensorReading(reading string) (Reading, error) {
-//	renum := regexp.MustCompile(`[0-9]`)
-//	lines := strings.Split(reading, "\n")
-//	prevline := ""
-//	for _, line := range lines {
-//		if strings.HasPrefix(line, "Adapter:") {
-//			// previous line is the device identifier
-//
-//		} else {
-//			if strings.Contains(line, ":") && renum.MatchString(line) {
-//
-//			}
-//		}
-//		// The previous line might have the hardware id
-//		prevline = line
-//	}
-//}
