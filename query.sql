@@ -2,6 +2,12 @@
 SELECT * FROM sensors
 WHERE id = ? LIMIT 1;
 
+-- name: GetSensorByNameAndDevice :one
+SELECT * FROM sensors
+WHERE sensor_name = ?
+AND sensor_device = ?
+LIMIT 1;
+
 -- name: ListSensors :many
 SELECT * FROM sensors
 ORDER BY sensor_name;
