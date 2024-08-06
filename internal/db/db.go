@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"path/filepath"
+	"tidbits/internal/db/sqlc"
 	"tidbits/internal/logger"
 
 	"tidbits/internal/utils"
@@ -15,8 +16,9 @@ import (
 const dbfilename = "tidbits.sqlite3"
 
 type TidbitsDB struct {
-	db  *sql.DB
-	log *logger.Logger
+	db      *sql.DB
+	log     *logger.Logger
+	queries *sqlc.Queries
 }
 
 type table struct {
@@ -39,9 +41,12 @@ func NewTidbitsDB(log *logger.Logger, migrations embed.FS) (*TidbitsDB, error) {
 		return nil, err
 	}
 
+	queries := sqlc.New(db)
+
 	return &TidbitsDB{
-		db:  db,
-		log: log,
+		db:      db,
+		log:     log,
+		queries: queries,
 	}, nil
 }
 
