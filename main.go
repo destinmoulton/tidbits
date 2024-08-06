@@ -2,14 +2,10 @@ package main
 
 import (
 	"embed"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
 	"tidbits/internal/cliflags"
 	"tidbits/internal/db"
+	gui "tidbits/internal/gui"
 	"tidbits/internal/logger"
-	"tidbits/internal/sensors"
 )
 
 // Use go embed to put them
@@ -31,21 +27,6 @@ func main() {
 
 	tbdb.Init()
 
-	a := app.New()
-	w := a.NewWindow("Tidbits")
-
-	sensdata, err := sensors.GetSensorReadings()
-	if err != nil {
-
-	}
-	button := widget.NewButton("Sensors", func() {
-		log.Info("clicked button")
-	})
-	menu := container.New(layout.NewVBoxLayout(), button)
-	rawsensor := widget.NewLabel(sensdata.Fulltext)
-	//rawsensor.Wrapping = fyne.TextWrapBreak
-	vscroll := container.NewVScroll(rawsensor)
-
-	w.SetContent(container.New(layout.NewHBoxLayout(), menu, vscroll))
-	w.ShowAndRun()
+	appGUI := gui.NewGUI(log, tbdb)
+	appGUI.Run()
 }
