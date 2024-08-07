@@ -13,27 +13,6 @@ import (
 	"tidbits/internal/sensors"
 )
 
-func (g *GUI) sensorsView() *fyne.Container {
-
-	placeholder := widget.NewLabel("sensors")
-	content := container.NewVScroll(placeholder)
-	wrapper := container.NewVScroll(content)
-	lmsensorsBtn := widget.NewButton("Choose lm_sensors", func() {
-		g.switchTab(GTabLMSensorsSelectForm)
-	})
-
-	switch g.subtab {
-	case GTabDefault:
-		content.Content = widget.NewLabel("SENSORS SECTION")
-	case GTabLMSensorsSelectForm:
-		content.Content = g.lmRenderSensorsForm()
-	}
-
-	menubar := container.New(layout.NewHBoxLayout(), lmsensorsBtn)
-
-	return container.NewBorder(menubar, nil, nil, nil, wrapper)
-}
-
 type selectedSensor struct {
 	sensorName sensors.SensorName
 	sensorType sensors.SensorType
@@ -41,6 +20,30 @@ type selectedSensor struct {
 }
 
 type selectedSensors map[string]selectedSensor
+
+func (g *GUI) sensorsView() *fyne.Container {
+
+	placeholder := widget.NewLabel("sensors")
+	//content := container.NewVScroll(placeholder)
+	wrapper := container.NewVScroll(placeholder)
+	lmsensorsBtn := widget.NewButton("Choose lm_sensors", func() {
+		g.switchTab(GTabLMSensorsSelectForm)
+	})
+
+	switch g.subtab {
+	case GTabDefault:
+		wrapper.Content = widget.NewLabel("SENSORS SECTION")
+	case GTabLMSensorsSelectForm:
+
+		form := g.lmRenderSensorsForm()
+		wrapper.Content = form
+		wrapper.Content.Resize(fyne.NewSize(g.calcContentWidth()-GUIWidthFudge*2, g.calcContentHeight()))
+	}
+
+	menubar := container.New(layout.NewHBoxLayout(), lmsensorsBtn)
+
+	return container.NewBorder(menubar, nil, nil, nil, wrapper)
+}
 
 func (g *GUI) lmRenderSensorsForm() *widget.Form {
 	ctx := context.Background()

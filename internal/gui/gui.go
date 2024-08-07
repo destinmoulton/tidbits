@@ -30,10 +30,13 @@ const (
 )
 
 const (
-	GUIMenuWidth = 200
-	GUIMinHeight
-	GUIWidthOffset = 20
-	GUIMargin      = 5
+	GUIMargin          = 5
+	GUIWidthFudge      = 20
+	GUIHeightFudge     = 30
+	GUIMenuWidth       = 200
+	GUIMinHeight       = 200
+	GUIMinWidth        = 200
+	GUIMessengerHeight = 200
 )
 
 type GUI struct {
@@ -76,8 +79,8 @@ func (g *GUI) Run() {
 
 	size := g.window.Content().Size()
 	leftMenu.SetMinSize(fyne.NewSize(GUIMenuWidth, GUIMinHeight))
-	g.content.SetMinSize(fyne.NewSize(size.Width-GUIMenuWidth, GUIMinHeight))
-	g.messenger.SetMinSize(fyne.NewSize(size.Width, GUIMinHeight))
+	g.content.SetMinSize(fyne.NewSize(GUIMinWidth, GUIMinHeight))
+	g.messenger.SetMinSize(fyne.NewSize(size.Width, GUIMessengerHeight))
 
 	g.window.ShowAndRun()
 }
@@ -100,9 +103,18 @@ func (g *GUI) render() {
 	case GViewSensors:
 		g.content.Content = g.sensorsView()
 	}
-	size := g.window.Content().Size()
-	g.content.SetMinSize(fyne.NewSize(size.Width-GUIMenuWidth-GUIWidthOffset, GUIMinHeight))
+	g.content.SetMinSize(fyne.NewSize(g.calcContentWidth(), g.calcContentHeight()))
 	g.content.Refresh()
+}
+
+func (g *GUI) calcContentWidth() float32 {
+	size := g.window.Content().Size()
+	return size.Width - GUIMenuWidth - GUIWidthFudge
+}
+
+func (g *GUI) calcContentHeight() float32 {
+	size := g.window.Content().Size()
+	return size.Height - GUIMessengerHeight - GUIHeightFudge
 }
 
 func (g *GUI) buildLeftMenu() *container.Scroll {
