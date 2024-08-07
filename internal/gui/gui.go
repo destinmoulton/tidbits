@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -11,45 +12,90 @@ import (
 	"tidbits/internal/logger"
 )
 
+type GUIViewID int
+
+const (
+	GViewDashoard GUIViewID = iota
+	GViewSensors
+)
+
+type GUITabID int
+
+const (
+	GTabDefault GUITabID = iota
+	GTabLMSensorsSelectForm
+	GTabLMSensorsUserForm
+)
+
 type GUI struct {
-	log  *logger.Logger
-	tbdb *db.TidbitsDB
+	log     *logger.Logger
+	tbdb    *db.TidbitsDB
+	app     fyne.App
+	window  fyne.Window
+	content fyne.CanvasObject
+	view    GUIViewID
+	subtab  GUITabID
 }
 
 func NewGUI(log *logger.Logger, tbdb *db.TidbitsDB) *GUI {
+	tmp := widget.NewLabel("")
 	return &GUI{
-		log:  log,
-		tbdb: tbdb,
+		log:     log,
+		tbdb:    tbdb,
+		content: tmp,
+		view:    GViewDashoard,
+		subtab:  GTabDefault,
 	}
 }
 
 func (g *GUI) Run() {
 
-	a := app.New()
-	w := a.NewWindow("Tidbits")
+	g.app = app.New()
+	g.window = g.app.NewWindow("Tidbits")
+	g.render()
+	g.window.ShowAndRun()
+}
+
+func (g *GUI) switchTab(tab GUITabID) {
+	g.subtab = tab
+	g.render()
+}
+
+func (g *GUI) switchView(view GUIViewID) {
+	g.view = view
+	g.subtab = GTabDefault
+	g.render()
+}
+
+func (g *GUI) render() {
 
 	placeholder := widget.NewLabel("placeholder")
 	temp2 := widget.NewLabel("temp2")
 
 	mainContent := container.NewVScroll(placeholder)
-	mainContent.Content = temp2
+	mainContent.Content = g.content
 
 	dashBtn := widget.NewButton("Dashboard", func() {
-		mainContent.Content = BuildDashboardBox()
+		g.switchView(GViewDashoard)
 	})
 	sensorsBtn := widget.NewButton("Sensors", func() {
-		mainContent.Content = BuildSensorsBox()
+		g.switchView(GViewSensors)
 	})
 	quitBtn := widget.NewButton("Quit", func() {
 		temp2.SetText("NUEVO")
-		a.Quit()
+		g.app.Quit()
 	})
+
+	switch g.view {
+	case GViewDashoard:
+		mainContent.Content = BuildDashboardBox()
+	case GViewSensors:
+		mainContent.Content = g.sensorsView()
+	}
 
 	top := canvas.NewText("top bar", color.White)
 	left := container.New(layout.NewVBoxLayout(), dashBtn, sensorsBtn, quitBtn)
 	content := container.NewBorder(top, nil, left, nil, mainContent)
-	//rawsensor.Wrapping = fyne.TextWrapBreak
 
-	w.SetContent(container.New(layout.NewHBoxLayout(), content))
-	w.ShowAndRun()
+	g.window.SetContent(container.New(layout.NewHBoxLayout(), content))
 }

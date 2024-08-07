@@ -2,11 +2,9 @@
 SELECT * FROM sensors
 WHERE id = ? LIMIT 1;
 
--- name: GetSensorByNameAndDevice :one
+-- name: GetSensorsBySource :many
 SELECT * FROM sensors
-WHERE sensor_name = ?
-AND sensor_device = ?
-LIMIT 1;
+WHERE sensor_source = ?;
 
 -- name: ListSensors :many
 SELECT * FROM sensors
@@ -17,11 +15,9 @@ INSERT INTO sensors (
     sensor_name,
     sensor_type,
     sensor_device,
-    user_label,
-    user_units,
-    should_log
+    sensor_source
 ) VALUES (
-    ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?
 )
 RETURNING *;
 

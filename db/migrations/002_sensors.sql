@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS sensors(
     sensor_name TEXT,
     sensor_type TEXT,
     sensor_device TEXT,
+    sensor_source TEXT,
     user_label TEXT,
     user_units TEXT,
     should_log INTEGER

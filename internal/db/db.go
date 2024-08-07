@@ -18,7 +18,7 @@ const dbfilename = "tidbits.sqlite3"
 type TidbitsDB struct {
 	db      *sql.DB
 	log     *logger.Logger
-	queries *sqlc.Queries
+	Queries *sqlc.Queries
 }
 
 type table struct {
@@ -46,7 +46,7 @@ func NewTidbitsDB(log *logger.Logger, migrations embed.FS) (*TidbitsDB, error) {
 	return &TidbitsDB{
 		db:      db,
 		log:     log,
-		queries: queries,
+		Queries: queries,
 	}, nil
 }
 

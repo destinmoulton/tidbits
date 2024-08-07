@@ -13,6 +13,7 @@ type Sensor struct {
 	SensorName   sql.NullString
 	SensorType   sql.NullString
 	SensorDevice sql.NullString
+	SensorSource sql.NullString
 	UserLabel    sql.NullString
 	UserUnits    sql.NullString
 	ShouldLog    sql.NullInt64
