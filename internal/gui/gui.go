@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"strings"
 	"tidbits/internal/db"
 	"tidbits/internal/logger"
 )
@@ -26,6 +27,13 @@ const (
 	GTabDefault GUITabID = iota
 	GTabLMSensorsSelectForm
 	GTabLMSensorsUserForm
+)
+
+const (
+	GUIMenuWidth = 200
+	GUIMinHeight
+	GUIWidthOffset = 20
+	GUIMargin      = 5
 )
 
 type GUI struct {
@@ -59,14 +67,18 @@ func (g *GUI) Run() {
 
 	g.content = container.NewVScroll(placeholder)
 	g.content.Content = blank
-	g.content.SetMinSize(fyne.NewSize(600, 600))
 
 	top := canvas.NewText("top bar", color.White)
-	left := g.buildLeftMenu()
+	leftMenu := g.buildLeftMenu()
 	g.messenger = container.NewVScroll(widget.NewLabel("messages"))
-	g.messenger.SetMinSize(fyne.NewSize(400, 400))
-	content := container.NewBorder(top, g.messenger, left, nil, g.content)
+	content := container.NewBorder(top, g.messenger, leftMenu, nil, g.content)
 	g.window.SetContent(container.New(layout.NewHBoxLayout(), content))
+
+	size := g.window.Content().Size()
+	leftMenu.SetMinSize(fyne.NewSize(GUIMenuWidth, GUIMinHeight))
+	g.content.SetMinSize(fyne.NewSize(size.Width-GUIMenuWidth, GUIMinHeight))
+	g.messenger.SetMinSize(fyne.NewSize(size.Width, GUIMinHeight))
+
 	g.window.ShowAndRun()
 }
 
@@ -88,10 +100,12 @@ func (g *GUI) render() {
 	case GViewSensors:
 		g.content.Content = g.sensorsView()
 	}
+	size := g.window.Content().Size()
+	g.content.SetMinSize(fyne.NewSize(size.Width-GUIMenuWidth-GUIWidthOffset, GUIMinHeight))
 	g.content.Refresh()
 }
 
-func (g *GUI) buildLeftMenu() *fyne.Container {
+func (g *GUI) buildLeftMenu() *container.Scroll {
 
 	dashBtn := widget.NewButton("Dashboard", func() {
 		g.switchView(GViewDashoard)
@@ -102,11 +116,17 @@ func (g *GUI) buildLeftMenu() *fyne.Container {
 	quitBtn := widget.NewButton("Quit", func() {
 		g.app.Quit()
 	})
-	return container.New(layout.NewVBoxLayout(), dashBtn, sensorsBtn, quitBtn)
+	cont := container.New(layout.NewVBoxLayout(), dashBtn, sensorsBtn, quitBtn)
+	return container.NewVScroll(cont)
 }
 
-func (g *GUI) msg(msg string) {
-	g.messages = append(g.messages, msg)
+func (g *GUI) msg(msg string, parts ...string) {
+	if len(parts) > 0 {
+		tmp := strings.Join(parts, "")
+		g.messages = append(g.messages, msg+tmp)
+	} else {
+		g.messages = append(g.messages, msg)
+	}
 
 	output := ""
 	for i := len(g.messages) - 1; i >= 0; i-- {
