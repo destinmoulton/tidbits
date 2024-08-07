@@ -80,7 +80,7 @@ func (g *GUI) lmRenderSensorsForm() *widget.Form {
 					} else {
 						delete(selected, id)
 					}
-					fmt.Println("checked event " + string(id))
+					g.msg("checked event " + string(id))
 				})
 
 				// Find already selected sensors

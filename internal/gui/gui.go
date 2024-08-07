@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -28,23 +29,23 @@ const (
 )
 
 type GUI struct {
-	log     *logger.Logger
-	tbdb    *db.TidbitsDB
-	app     fyne.App
-	window  fyne.Window
-	content fyne.CanvasObject
-	view    GUIViewID
-	subtab  GUITabID
+	log       *logger.Logger
+	tbdb      *db.TidbitsDB
+	app       fyne.App
+	window    fyne.Window
+	view      GUIViewID
+	subtab    GUITabID
+	messages  []string
+	messenger *container.Scroll
+	content   *container.Scroll
 }
 
 func NewGUI(log *logger.Logger, tbdb *db.TidbitsDB) *GUI {
-	tmp := widget.NewLabel("")
 	return &GUI{
-		log:     log,
-		tbdb:    tbdb,
-		content: tmp,
-		view:    GViewDashoard,
-		subtab:  GTabDefault,
+		log:    log,
+		tbdb:   tbdb,
+		view:   GViewDashoard,
+		subtab: GTabDefault,
 	}
 }
 
@@ -52,7 +53,20 @@ func (g *GUI) Run() {
 
 	g.app = app.New()
 	g.window = g.app.NewWindow("Tidbits")
-	g.render()
+
+	placeholder := widget.NewLabel("")
+	blank := widget.NewLabel("")
+
+	g.content = container.NewVScroll(placeholder)
+	g.content.Content = blank
+	g.content.SetMinSize(fyne.NewSize(600, 600))
+
+	top := canvas.NewText("top bar", color.White)
+	left := g.buildLeftMenu()
+	g.messenger = container.NewVScroll(widget.NewLabel("messages"))
+	g.messenger.SetMinSize(fyne.NewSize(400, 400))
+	content := container.NewBorder(top, g.messenger, left, nil, g.content)
+	g.window.SetContent(container.New(layout.NewHBoxLayout(), content))
 	g.window.ShowAndRun()
 }
 
@@ -68,12 +82,16 @@ func (g *GUI) switchView(view GUIViewID) {
 }
 
 func (g *GUI) render() {
+	switch g.view {
+	case GViewDashoard:
+		g.content.Content = BuildDashboardBox()
+	case GViewSensors:
+		g.content.Content = g.sensorsView()
+	}
+	g.content.Refresh()
+}
 
-	placeholder := widget.NewLabel("placeholder")
-	temp2 := widget.NewLabel("temp2")
-
-	mainContent := container.NewVScroll(placeholder)
-	mainContent.Content = g.content
+func (g *GUI) buildLeftMenu() *fyne.Container {
 
 	dashBtn := widget.NewButton("Dashboard", func() {
 		g.switchView(GViewDashoard)
@@ -82,20 +100,19 @@ func (g *GUI) render() {
 		g.switchView(GViewSensors)
 	})
 	quitBtn := widget.NewButton("Quit", func() {
-		temp2.SetText("NUEVO")
 		g.app.Quit()
 	})
+	return container.New(layout.NewVBoxLayout(), dashBtn, sensorsBtn, quitBtn)
+}
 
-	switch g.view {
-	case GViewDashoard:
-		mainContent.Content = BuildDashboardBox()
-	case GViewSensors:
-		mainContent.Content = g.sensorsView()
+func (g *GUI) msg(msg string) {
+	g.messages = append(g.messages, msg)
+
+	output := ""
+	for i := len(g.messages) - 1; i >= 0; i-- {
+		output += fmt.Sprintf("%s\n", g.messages[i])
 	}
 
-	top := canvas.NewText("top bar", color.White)
-	left := container.New(layout.NewVBoxLayout(), dashBtn, sensorsBtn, quitBtn)
-	content := container.NewBorder(top, nil, left, nil, mainContent)
-
-	g.window.SetContent(container.New(layout.NewHBoxLayout(), content))
+	g.messenger.Content = widget.NewLabel(output)
+	g.messenger.Refresh()
 }
