@@ -17,6 +17,7 @@ type Sensor struct {
 	UserLabel    sql.NullString
 	UserUnits    sql.NullString
 	ShouldLog    sql.NullInt64
+	SensorOrder  sql.NullInt64
 }
 
 type SensorLog struct {

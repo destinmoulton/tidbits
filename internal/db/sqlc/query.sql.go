@@ -15,11 +15,12 @@ INSERT INTO sensors (
     sensor_name,
     sensor_type,
     sensor_device,
-    sensor_source
+    sensor_source,
+    user_label
 ) VALUES (
-    ?, ?, ?, ?
+    ?, ?, ?, ?, ?
 )
-RETURNING id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log
+RETURNING id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log, sensor_order
 `
 
 type CreateSensorParams struct {
@@ -27,6 +28,7 @@ type CreateSensorParams struct {
 	SensorType   sql.NullString
 	SensorDevice sql.NullString
 	SensorSource sql.NullString
+	UserLabel    sql.NullString
 }
 
 func (q *Queries) CreateSensor(ctx context.Context, arg CreateSensorParams) (Sensor, error) {
@@ -35,6 +37,7 @@ func (q *Queries) CreateSensor(ctx context.Context, arg CreateSensorParams) (Sen
 		arg.SensorType,
 		arg.SensorDevice,
 		arg.SensorSource,
+		arg.UserLabel,
 	)
 	var i Sensor
 	err := row.Scan(
@@ -46,6 +49,7 @@ func (q *Queries) CreateSensor(ctx context.Context, arg CreateSensorParams) (Sen
 		&i.UserLabel,
 		&i.UserUnits,
 		&i.ShouldLog,
+		&i.SensorOrder,
 	)
 	return i, err
 }
@@ -61,7 +65,7 @@ func (q *Queries) DeleteSensor(ctx context.Context, id int64) error {
 }
 
 const getSensor = `-- name: GetSensor :one
-SELECT id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log FROM sensors
+SELECT id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log, sensor_order FROM sensors
 WHERE id = ? LIMIT 1
 `
 
@@ -77,13 +81,15 @@ func (q *Queries) GetSensor(ctx context.Context, id int64) (Sensor, error) {
 		&i.UserLabel,
 		&i.UserUnits,
 		&i.ShouldLog,
+		&i.SensorOrder,
 	)
 	return i, err
 }
 
 const getSensorsBySource = `-- name: GetSensorsBySource :many
-SELECT id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log FROM sensors
+SELECT id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log, sensor_order FROM sensors
 WHERE sensor_source = ?
+ORDER BY sensor_order ASC
 `
 
 func (q *Queries) GetSensorsBySource(ctx context.Context, sensorSource sql.NullString) ([]Sensor, error) {
@@ -104,6 +110,7 @@ func (q *Queries) GetSensorsBySource(ctx context.Context, sensorSource sql.NullS
 			&i.UserLabel,
 			&i.UserUnits,
 			&i.ShouldLog,
+			&i.SensorOrder,
 		); err != nil {
 			return nil, err
 		}
@@ -119,8 +126,8 @@ func (q *Queries) GetSensorsBySource(ctx context.Context, sensorSource sql.NullS
 }
 
 const listSensors = `-- name: ListSensors :many
-SELECT id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log FROM sensors
-ORDER BY sensor_name
+SELECT id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log, sensor_order FROM sensors
+ORDER BY sensor_order ASC
 `
 
 func (q *Queries) ListSensors(ctx context.Context) ([]Sensor, error) {
@@ -141,6 +148,7 @@ func (q *Queries) ListSensors(ctx context.Context) ([]Sensor, error) {
 			&i.UserLabel,
 			&i.UserUnits,
 			&i.ShouldLog,
+			&i.SensorOrder,
 		); err != nil {
 			return nil, err
 		}
@@ -159,15 +167,17 @@ const updateSensor = `-- name: UpdateSensor :exec
 UPDATE sensors
 set user_label = ?,
     user_units = ?,
-    should_log = ?
+    should_log = ?,
+    sensor_order = ?
 WHERE id = ?
 `
 
 type UpdateSensorParams struct {
-	UserLabel sql.NullString
-	UserUnits sql.NullString
-	ShouldLog sql.NullInt64
-	ID        int64
+	UserLabel   sql.NullString
+	UserUnits   sql.NullString
+	ShouldLog   sql.NullInt64
+	SensorOrder sql.NullInt64
+	ID          int64
 }
 
 func (q *Queries) UpdateSensor(ctx context.Context, arg UpdateSensorParams) error {
@@ -175,6 +185,7 @@ func (q *Queries) UpdateSensor(ctx context.Context, arg UpdateSensorParams) erro
 		arg.UserLabel,
 		arg.UserUnits,
 		arg.ShouldLog,
+		arg.SensorOrder,
 		arg.ID,
 	)
 	return err
