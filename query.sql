@@ -4,11 +4,12 @@ WHERE id = ? LIMIT 1;
 
 -- name: GetSensorsBySource :many
 SELECT * FROM sensors
-WHERE sensor_source = ?;
+WHERE sensor_source = ?
+ORDER BY sensor_order ASC;
 
 -- name: ListSensors :many
 SELECT * FROM sensors
-ORDER BY sensor_name;
+ORDER BY sensor_order ASC;
 
 -- name: CreateSensor :one
 INSERT INTO sensors (
@@ -26,7 +27,8 @@ RETURNING *;
 UPDATE sensors
 set user_label = ?,
     user_units = ?,
-    should_log = ?
+    should_log = ?,
+    order = ?
 WHERE id = ?;
 
 -- name: DeleteSensor :exec

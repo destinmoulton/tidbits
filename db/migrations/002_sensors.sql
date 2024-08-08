@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS sensors(
     user_label TEXT,
     user_units TEXT,
     should_log INTEGER,
-    order INTEGER
+    sensor_order INTEGER
 );
 
 -- migrate:down
