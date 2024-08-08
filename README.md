@@ -1,3 +1,10 @@
+## Build
+
+Build the binary
+```sh
+$ go build -v -x main.go
+```
+
 ## SQL Queries
 
 Uses `sqlc` to generate go from sql files.
