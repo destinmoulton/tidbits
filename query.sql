@@ -15,9 +15,10 @@ INSERT INTO sensors (
     sensor_name,
     sensor_type,
     sensor_device,
-    sensor_source
+    sensor_source,
+    user_label
 ) VALUES (
-    ?, ?, ?, ?
+    ?, ?, ?, ?, ?
 )
 RETURNING *;
 
