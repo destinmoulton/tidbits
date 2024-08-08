@@ -17,16 +17,16 @@ INSERT INTO sensors (
     sensor_type,
     sensor_device,
     sensor_source,
-    user_label
+    user_label,
+    sensor_order
 ) VALUES (
-    ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?
 )
 RETURNING *;
 
 -- name: UpdateSensor :exec
 UPDATE sensors
 set user_label = ?,
-    user_units = ?,
     should_log = ?,
     sensor_order = ?
 WHERE id = ?;

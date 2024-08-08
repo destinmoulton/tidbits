@@ -99,7 +99,7 @@ func (g *GUI) switchView(view GUIViewID) {
 func (g *GUI) render() {
 	switch g.view {
 	case GViewDashoard:
-		g.content.Content = BuildDashboardBox()
+		g.content.Content = g.dashboardView()
 	case GViewSensors:
 		g.content.Content = g.sensorsView()
 	}
@@ -132,19 +132,11 @@ func (g *GUI) buildLeftMenu() *container.Scroll {
 	return container.NewVScroll(cont)
 }
 
-func (g *GUI) msg(msg string, parts ...string) {
-	if len(parts) > 0 {
-		tmp := strings.Join(parts, "")
-		g.messages = append(g.messages, msg+tmp)
-	} else {
-		g.messages = append(g.messages, msg)
+func (g *GUI) msg(parts ...interface{}) {
+	var builder strings.Builder
+	for _, part := range parts {
+		builder.WriteString(fmt.Sprintf("%v", part))
 	}
-
-	output := ""
-	for i := len(g.messages) - 1; i >= 0; i-- {
-		output += fmt.Sprintf("%s\n", g.messages[i])
-	}
-
-	g.messenger.Content = widget.NewLabel(output)
+	g.messenger.Content = widget.NewLabel(builder.String())
 	g.messenger.Refresh()
 }

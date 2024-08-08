@@ -16,9 +16,10 @@ INSERT INTO sensors (
     sensor_type,
     sensor_device,
     sensor_source,
-    user_label
+    user_label,
+    sensor_order
 ) VALUES (
-    ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?
 )
 RETURNING id, sensor_name, sensor_type, sensor_device, sensor_source, user_label, user_units, should_log, sensor_order
 `
@@ -29,6 +30,7 @@ type CreateSensorParams struct {
 	SensorDevice sql.NullString
 	SensorSource sql.NullString
 	UserLabel    sql.NullString
+	SensorOrder  sql.NullInt64
 }
 
 func (q *Queries) CreateSensor(ctx context.Context, arg CreateSensorParams) (Sensor, error) {
@@ -38,6 +40,7 @@ func (q *Queries) CreateSensor(ctx context.Context, arg CreateSensorParams) (Sen
 		arg.SensorDevice,
 		arg.SensorSource,
 		arg.UserLabel,
+		arg.SensorOrder,
 	)
 	var i Sensor
 	err := row.Scan(

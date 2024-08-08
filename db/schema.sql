@@ -12,7 +12,8 @@ CREATE TABLE sensors(
     sensor_source TEXT,
     user_label TEXT,
     user_units TEXT,
-    should_log INTEGER
+    should_log INTEGER,
+    sensor_order INTEGER
 );
 CREATE TABLE sensor_log(
     sensor_id INTEGER,
