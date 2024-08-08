@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 	"os"
 	"path/filepath"
 )
@@ -28,4 +30,13 @@ func GetConfigDir() string {
 	}
 	return ""
 
+}
+
+func BytesToMegabytesBinary(bytes int64) float64 {
+	return float64(bytes) / 1048576
+}
+
+func AddCommas(n int) string {
+	p := message.NewPrinter(language.English)
+	return p.Sprintf("%d", n)
 }
