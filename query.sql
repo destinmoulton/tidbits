@@ -28,7 +28,7 @@ UPDATE sensors
 set user_label = ?,
     user_units = ?,
     should_log = ?,
-    order = ?
+    sensor_order = ?
 WHERE id = ?;
 
 -- name: DeleteSensor :exec
