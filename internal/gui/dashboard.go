@@ -30,7 +30,6 @@ func (g *GUI) dashboardView() *fyne.Container {
 	var boundSensors dashSensors
 
 	g.initSensorBindings(&boundSensors)
-	fmt.Println("count boundSensors " + string(len(boundSensors)))
 	sensorsTable := g.buildDashSensorsTable(boundSensors)
 	go func() {
 		for {
