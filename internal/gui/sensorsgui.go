@@ -177,7 +177,7 @@ func (g *GUI) saveLmSensors(storedSettings []sqlc.Sensor, chkdSensors selectedSe
 			SensorOrder:  sql.NullInt64{Int64: int64(order), Valid: true},
 		})
 		if err != nil {
-			g.msg("error adding sensor to db", err)
+			g.msg("error adding sensorDataItem to db", err)
 		}
 		order += 1
 	}
@@ -188,7 +188,7 @@ func (g *GUI) saveLmSensors(storedSettings []sqlc.Sensor, chkdSensors selectedSe
 		err := g.tbdb.Queries.DeleteSensor(ctx, deleteId)
 
 		if err != nil {
-			g.msg("error removing sensor from db", err)
+			g.msg("error removing sensorDataItem from db", err)
 		}
 	}
 }
@@ -212,7 +212,7 @@ func (g *GUI) buildEditSensorsForm() *widget.Form {
 		orders[id] = strconv.FormatInt(sens.SensorOrder.Int64, 10)
 		shouldLog[id] = sens.ShouldLog.Int64 == 1
 
-		// user label for the sensor
+		// user label for the sensorDataItem
 		entryUserLabel := widget.NewEntry()
 		entryUserLabel.SetText(labels[id])
 		entryUserLabel.OnChanged = func(value string) {
@@ -226,7 +226,7 @@ func (g *GUI) buildEditSensorsForm() *widget.Form {
 
 		rows = append(rows, labelFormItem)
 
-		// order for the sensor
+		// order for the sensorDataItem
 		orderLabel := widget.NewEntry()
 		orderLabel.SetText(orders[id])
 		orderLabel.OnChanged = func(value string) {
@@ -244,7 +244,7 @@ func (g *GUI) buildEditSensorsForm() *widget.Form {
 			shouldLog[id] = value
 		})
 		checkItem := &widget.FormItem{
-			Text:   sens.SensorName.String + " Log this sensor?",
+			Text:   sens.SensorName.String + " Log this sensorDataItem?",
 			Widget: checkbox,
 		}
 
@@ -286,7 +286,7 @@ func (g *GUI) processUserSensor(labels map[string]string, orders map[string]stri
 			SensorOrder: sql.NullInt64{Int64: storeOrder, Valid: true},
 		})
 		if uerr != nil {
-			g.msg("error updating sensor to db", err)
+			g.msg("error updating sensorDataItem to db", err)
 		}
 	}
 }

@@ -6,11 +6,13 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 	"strings"
 	"tidbits/internal/db"
+	"tidbits/internal/gui/icon"
 	"tidbits/internal/logger"
 )
 
@@ -62,7 +64,7 @@ func NewGUI(log *logger.Logger, tbdb *db.TidbitsDB) *GUI {
 
 func (g *GUI) Run() {
 
-	g.app = app.New()
+	g.app = app.NewWithID("com.dmo.tidbits")
 	g.window = g.app.NewWindow("Tidbits")
 
 	placeholder := widget.NewLabel("")
@@ -81,6 +83,24 @@ func (g *GUI) Run() {
 	leftMenu.SetMinSize(fyne.NewSize(GUIMenuWidth, GUIMinHeight))
 	g.content.SetMinSize(fyne.NewSize(GUIMinWidth, GUIMinHeight))
 	g.messenger.SetMinSize(fyne.NewSize(size.Width, GUIMessengerHeight))
+
+	g.render()
+
+	// setup system tray
+	if desk, ok := g.app.(desktop.App); ok {
+		fmt.Println("starting systray")
+		m := fyne.NewMenu("Tidbits",
+			fyne.NewMenuItem("Show", func() {
+				g.window.Show()
+			}))
+		fmt.Println(m)
+		desk.SetSystemTrayMenu(m)
+		ic := fyne.NewStaticResource("icon.png", icon.Data)
+		desk.SetSystemTrayIcon(ic)
+		g.window.SetCloseIntercept(func() {
+			g.window.Hide()
+		})
+	}
 
 	g.window.ShowAndRun()
 }
